@@ -1,14 +1,33 @@
 import java.awt.Container;
+import java.util.List;
 import java.util.Properties;
 
 import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableModel;
+
 import org.jdatepicker.impl.JDatePanelImpl;
 import org.jdatepicker.impl.JDatePickerImpl;
 import org.jdatepicker.impl.UtilDateModel;
 
+import data.models.User;
 import gui.util.DateLabelFormatter;
+import services.DbService;
 
 public class Main {
+
+    private static void UpdateTable(JTable table) {
+        DefaultTableModel model = (DefaultTableModel) table.getModel();
+
+        DbService db = new DbService();
+        List<User> users = db.GetUsers();
+        for (User user : users) {
+            model.insertRow(0, new Object[] {
+                    user.id, user.name, user.job, user.BirthDate.toString()
+            });
+        }
+    }
+
     public static void main(String args[]) {
         JFrame frame = new JFrame("My First GUI");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -68,28 +87,17 @@ public class Main {
         messageLabel.setLocation(10, 150);
         content.add(messageLabel);
 
-        String[] columnNames = { "First Name",
-                "Last Name",
-                "Sport",
-                "# of Years",
-                "Vegetarian" };
-        Object[][] data = {
-                { "Kathy", "Smith",
-                        "Snowboarding", new Integer(5), new Boolean(false) },
-                { "John", "Doe",
-                        "Rowing", new Integer(3), new Boolean(true) },
-                { "Sue", "Black",
-                        "Knitting", new Integer(2), new Boolean(false) },
-                { "Jane", "White",
-                        "Speed reading", new Integer(20), new Boolean(true) },
-                { "Joe", "Brown",
-                        "Pool", new Integer(10), new Boolean(false) }
-        };
-
-        JTable table = new JTable(data, columnNames);
+        DefaultTableModel tableModel = new DefaultTableModel();
+        tableModel.addColumn("ID");
+        tableModel.addColumn("ФИО");
+        tableModel.addColumn("Должность");
+        tableModel.addColumn("Дата рождения");
+        JTable table = new JTable(tableModel);
         table.setSize(450, 500);
         table.setLocation(400, 10);
         content.add(table);
+
+        UpdateTable(table);
 
         frame.setVisible(true);
     }

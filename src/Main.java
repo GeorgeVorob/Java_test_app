@@ -63,6 +63,11 @@ public class Main {
         authBtn.setLocation(120, 120);
         content.add(authBtn);
 
+        JLabel messageLabel = new JLabel("...");
+        messageLabel.setSize(100, 20);
+        messageLabel.setLocation(10, 150);
+        content.add(messageLabel);
+
         String[] columnNames = { "First Name",
                 "Last Name",
                 "Sport",

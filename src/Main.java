@@ -63,6 +63,29 @@ public class Main {
         authBtn.setLocation(120, 120);
         content.add(authBtn);
 
+        String[] columnNames = { "First Name",
+                "Last Name",
+                "Sport",
+                "# of Years",
+                "Vegetarian" };
+        Object[][] data = {
+                { "Kathy", "Smith",
+                        "Snowboarding", new Integer(5), new Boolean(false) },
+                { "John", "Doe",
+                        "Rowing", new Integer(3), new Boolean(true) },
+                { "Sue", "Black",
+                        "Knitting", new Integer(2), new Boolean(false) },
+                { "Jane", "White",
+                        "Speed reading", new Integer(20), new Boolean(true) },
+                { "Joe", "Brown",
+                        "Pool", new Integer(10), new Boolean(false) }
+        };
+
+        JTable table = new JTable(data, columnNames);
+        table.setSize(450, 500);
+        table.setLocation(400, 10);
+        content.add(table);
+
         frame.setVisible(true);
     }
 }

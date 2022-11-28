@@ -5,6 +5,8 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,20 +14,19 @@ import data.models.Job;
 import data.models.User;
 
 public class DbService {
+    private DateFormat dateReader = new SimpleDateFormat("yyyy-MM-dd");
+
     private Connection GetConn() {
         try {
-            Class.forName("com.mysql.jdbc.Driver");
             return DriverManager.getConnection(
-                    "jdbc:mysql://localhost:3306/java?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC",
-                    "root",
-                    "root");
+                    "jdbc:sqlite:java.db");
         } catch (Exception e) {
             return null;
         }
     }
 
     public List<User> GetUsers() {
-        String command = "SELECT u.id, u.name, u.Job_id, j.Name, u.BirthDate FROM users as u JOIN jobs as j;";
+        String command = "SELECT u.id, u.name, u.Job_id, j.Name, u.BirthDate FROM users as u JOIN jobs as j ON u.Job_id = j.id;";
 
         try (Connection conn = GetConn()) {
             Statement statement = conn.createStatement();
@@ -39,7 +40,7 @@ public class DbService {
                 user.name = usersData.getString(2);
                 user.job_id = usersData.getInt(3);
                 user.job = usersData.getString(4);
-                user.BirthDate = usersData.getDate(5);
+                user.BirthDate = dateReader.parse(usersData.getString(5));
 
                 results.add(user);
             }
@@ -64,7 +65,7 @@ public class DbService {
                 user.name = usersData.getString(2);
                 user.job_id = usersData.getInt(3);
                 user.job = usersData.getString(4);
-                user.BirthDate = usersData.getDate(5);
+                user.BirthDate = dateReader.parse(usersData.getString(5));
 
                 return user;
             }
@@ -113,7 +114,7 @@ public class DbService {
         try (Connection conn = GetConn()) {
             PreparedStatement preparedStatement = conn.prepareStatement(command);
             preparedStatement.setString(1, name);
-            preparedStatement.setDate(2, new java.sql.Date(birthDate.getTime()));
+            preparedStatement.setString(2, dateReader.format(birthDate));
             preparedStatement.setString(3, jobName);
 
             int rows = 0;

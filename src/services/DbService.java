@@ -1,7 +1,6 @@
 package services;
 
 import java.sql.Connection;
-import java.sql.Date;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -51,13 +50,43 @@ public class DbService {
         }
     }
 
-    public boolean Autorize(String username) {
-        String command = "SELECT COUNT(*) as amount FROM users;";
+    public User GetUserByName(String name) {
+        String command = "SELECT u.id, u.name, u.Job_id, j.Name, u.BirthDate FROM users as u JOIN jobs as j WHERE u.name = ? ;";
 
         try (Connection conn = GetConn()) {
-            Statement statement = conn.createStatement();
+            PreparedStatement statement = conn.prepareStatement(command);
+            statement.setString(1, name);
 
-            ResultSet usersData = statement.executeQuery(command);
+            ResultSet usersData = statement.executeQuery();
+            if (usersData.next() && usersData.getInt(1) > 0) {
+                User user = new User();
+                user.id = usersData.getInt(1);
+                user.name = usersData.getString(2);
+                user.job_id = usersData.getInt(3);
+                user.job = usersData.getString(4);
+                user.BirthDate = usersData.getDate(5);
+
+                return user;
+            }
+
+            return null;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    // Check if user exists
+    public boolean Autorize(String username) {
+        if (username == "")
+            return false;
+
+        String command = "SELECT COUNT(*) as amount FROM users WHERE name = ? ;";
+
+        try (Connection conn = GetConn()) {
+            PreparedStatement statement = conn.prepareStatement(command);
+            statement.setString(1, username);
+
+            ResultSet usersData = statement.executeQuery();
             if (usersData.next() && usersData.getInt(1) > 0) {
                 return true;
             }
@@ -68,7 +97,10 @@ public class DbService {
         }
     }
 
-    public boolean AddUser(String name, Date birthDate, String jobName) {
+    public boolean AddUser(String name, java.util.Date birthDate, String jobName) {
+        if (name.isEmpty() || birthDate == null || jobName.isEmpty())
+            return false;
+
         String command = """
                 INSERT INTO users (Name, BirthDate, Job_id)
                 VALUES (
@@ -81,7 +113,7 @@ public class DbService {
         try (Connection conn = GetConn()) {
             PreparedStatement preparedStatement = conn.prepareStatement(command);
             preparedStatement.setString(1, name);
-            preparedStatement.setDate(2, birthDate);
+            preparedStatement.setDate(2, new java.sql.Date(birthDate.getTime()));
             preparedStatement.setString(3, jobName);
 
             int rows = 0;

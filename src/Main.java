@@ -1,4 +1,5 @@
 import java.awt.Container;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
@@ -10,16 +11,18 @@ import org.jdatepicker.impl.JDatePanelImpl;
 import org.jdatepicker.impl.JDatePickerImpl;
 import org.jdatepicker.impl.UtilDateModel;
 
+import data.models.Job;
 import data.models.User;
 import gui.util.DateLabelFormatter;
 import services.DbService;
 
 public class Main {
 
+    private static DbService db = new DbService();
+
     private static void UpdateTable(JTable table) {
         DefaultTableModel model = (DefaultTableModel) table.getModel();
 
-        DbService db = new DbService();
         List<User> users = db.GetUsers();
         for (User user : users) {
             model.insertRow(0, new Object[] {
@@ -69,9 +72,13 @@ public class Main {
         jobLabel.setLocation(60, 90);
         content.add(jobLabel);
 
-        String[] jobStrings = { "1", "2", "3", "4", "5" };
-        JComboBox jobSelectBox = new JComboBox(jobStrings);
-        jobSelectBox.setSelectedIndex(4);
+        List<Job> jobs = db.GetJobs();
+        List<String> jobSelectStrings = new ArrayList<>();
+        for (Job job : jobs) {
+            jobSelectStrings.add(job.name);
+        }
+
+        JComboBox jobSelectBox = new JComboBox(jobSelectStrings.toArray());
         jobSelectBox.setLocation(130, 80);
         jobSelectBox.setSize(200, 30);
         content.add(jobSelectBox);
